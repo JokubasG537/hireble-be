@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const authMiddleware = require("../middleware/auth");
+
 const {
   registerUser,
   loginUser,
@@ -14,12 +16,12 @@ const {
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.post("/logout", logoutUser);
-
 router.get("/", getUsers);
-router.get("/current", getCurrentUser);
 router.get("/:id", getUserById);
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
+
+router.get("/current",authMiddleware, getCurrentUser);
+router.put("/:id", authMiddleware, updateUser);
+router.delete("/:id", authMiddleware, deleteUser);
+router.post("/logout",authMiddleware, logoutUser);
 
 module.exports = router;

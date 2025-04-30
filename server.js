@@ -11,7 +11,11 @@ app.use(express.json());
 
 
 const usersApi = require("./api/users.js");
+const jobPostsApi = require("./api/jobPosts.js");
+const savedJobsApi = require("./api/savedJobs.js");
 
+app.use("/jobPosts", jobPostsApi);
+app.use("/savedJobs", savedJobsApi);
 app.use("/users", usersApi);
 
 

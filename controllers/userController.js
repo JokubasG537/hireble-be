@@ -40,20 +40,16 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   const { email, password } = req.body;
-
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select("+password");
     if (!user) return res.status(400).json({ message: "User not found." });
-
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials." });
-
     const token = jwt.sign(
       { id: user._id, username: user.username, email: user.email, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "2h" }
     );
-
     res.status(200).json({
       message: "Login successful.",
       user: { id: user._id, username: user.username, email: user.email },
@@ -64,6 +60,7 @@ const loginUser = async (req, res) => {
     res.status(500).json({ message: "Something went wrong." });
   }
 };
+
 
 
 const logoutUser = (req, res) => {
@@ -96,17 +93,18 @@ const getUserById = async (req, res) => {
 };
 
 const getCurrentUser = async (req, res) => {
-  const userId = req.user.id;
-
   try {
-    const user = await User.findById(userId).select("-password");
-    if (!user) return res.status(404).json({ message: "User not found." });
+    const user = await User.findById(req.user._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
     res.status(200).json(user);
   } catch (error) {
-    console.error(error);
+    console.error("Error fetching current user:", error);
     res.status(500).json({ message: "Failed to fetch current user." });
   }
 };
+
 
 
 const updateUser = async (req, res) => {
@@ -170,7 +168,7 @@ const deleteUser = async (req, res) => {
     res.status(500).json({ message: "Failed to delete user." });
   }
 };
-//favs
+
 const addToFavorites = async (req, res) => {
   const userId = req.params.userId;
   const { carId } = req.body;
@@ -195,6 +193,8 @@ const addToFavorites = async (req, res) => {
 
   }
 };
+
+// todo: remove cars and add jobs instead
 
 const removeFromFavorites = async (req, res) => {
   const userId = req.params.userId;
