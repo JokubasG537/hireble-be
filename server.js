@@ -8,16 +8,20 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+require("dotenv").config();
 
 
 const usersApi = require("./api/users.js");
 const jobPostsApi = require("./api/jobPosts.js");
 const savedJobsApi = require("./api/savedJobs.js");
+const resumeApi = require("./api/resume.js");
+const companiesApi = require("./api/company.js");
 
 app.use("/jobPosts", jobPostsApi);
 app.use("/savedJobs", savedJobsApi);
 app.use("/users", usersApi);
-
+app.use("/resume", resumeApi);
+app.use("/companies", companiesApi);
 
 const PORT = process.env.PORT || 5000;
 
