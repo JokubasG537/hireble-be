@@ -16,12 +16,14 @@ const jobPostsApi = require("./api/jobPosts.js");
 const savedJobsApi = require("./api/savedJobs.js");
 const resumeApi = require("./api/resume.js");
 const companiesApi = require("./api/company.js");
+const jobApplicationsApi = require("./api/jobApplications.js");
 
 app.use("/jobPosts", jobPostsApi);
 app.use("/savedJobs", savedJobsApi);
 app.use("/users", usersApi);
 app.use("/resume", resumeApi);
 app.use("/companies", companiesApi);
+app.use("/jobApplications", jobApplicationsApi);
 
 const PORT = process.env.PORT || 5000;
 
