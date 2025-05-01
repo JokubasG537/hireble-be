@@ -1,12 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const companyController = require("../controllers/companyController");
+const authMiddleware = require("../middleware/auth");
+const authorizeRole = require("../middleware/authorizeRole");
 
-// Routes for company CRUD operations
-router.post("/", companyController.createCompany); // Create a new company
-router.get("/", companyController.getAllCompanies); // Get all companies
-router.get("/:id", companyController.getCompanyById); // Get company by ID
-router.put("/:id", companyController.updateCompany); // Update company by ID
-router.delete("/:id", companyController.deleteCompany); // Delete company by ID
+router.post("/", companyController.createCompany);
+router.get("/", companyController.getAllCompanies);
+router.get("/:id", companyController.getCompanyById);
+router.put("/:id", companyController.updateCompany);
+router.delete("/:id", companyController.deleteCompany);
+
+
 
 module.exports = router;

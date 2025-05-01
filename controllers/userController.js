@@ -1,10 +1,10 @@
 const User = require("../models/userModel.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-
+const Company = require("../models/Company");
 
 const registerUser = async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, email, password, role  } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -15,10 +15,26 @@ const registerUser = async (req, res) => {
     const newUser = new User({
       username,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      role: role || "user"
     });
 
+
     await newUser.save();
+
+    if (newUser.role === "recruiter") {
+      return res.status(201).json({
+        message: "Recruiter registered. Please create or select a company.",
+        user: { id: newUser._id, username: newUser.username, email: newUser.email },
+        token: jwt.sign(
+          { id: newUser._id, username: newUser.username },
+          process.env.JWT_SECRET,
+          { expiresIn: "2h" }
+        ),
+        nextStep: "company"
+      });
+    }
+
 
     const token = jwt.sign(
       { id: newUser._id, username: newUser.username },
@@ -169,6 +185,45 @@ const deleteUser = async (req, res) => {
   }
 };
 
+
+const assignCompanyToRecruiter = async (req, res) => {
+  const { companyId } = req.body;
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    if (user.role !== "recruiter") {
+      return res.status(403).json({ message: "Only recruiters can be assigned a company" });
+    }
+
+
+    const company = await Company.findById(companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    user.company = companyId;
+    await user.save();
+
+    company.recruiters.push(user._id);
+    await company.save();
+
+    res.status(200).json({
+      message: "Company assigned to recruiter",
+      user: {
+        id: user._id,
+        username: user.username,
+        company: user.company
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to assign company", error: err.message });
+  }
+};
+
+
 const addToFavorites = async (req, res) => {
   const userId = req.params.userId;
   const { carId } = req.body;
@@ -227,5 +282,6 @@ module.exports = {
   updateUser,
   deleteUser,
   addToFavorites,
-  removeFromFavorites
+  removeFromFavorites,
+  assignCompanyToRecruiter
 };

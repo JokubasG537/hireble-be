@@ -17,12 +17,16 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      select: false 
+      select: false
     },
     role: {
       type: String,
       enum: ["user", "recruiter", "admin"],
       default: "user"
+    },
+    company: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company"
     },
     savedJobs: [
       {

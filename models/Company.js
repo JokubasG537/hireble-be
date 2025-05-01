@@ -25,12 +25,18 @@ const companySchema = new mongoose.Schema(
       required: true
     },
     logoUrl: {
-      type: String,  
+      type: String,
     },
     jobPosts: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Job"
+      }
+    ],
+    recruiters: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
       }
     ]
   },
