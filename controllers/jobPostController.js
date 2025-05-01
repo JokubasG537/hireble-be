@@ -20,14 +20,63 @@ exports.createJobPost = async (req, res) => {
 };
 
 
+const sortOptionsMap = {
+  newest: { createdAt: -1 },
+  oldest: { createdAt: 1 },
+  title_asc: { title: 1 },
+  title_desc: { title: -1 }
+};
+
 exports.getAllJobPosts = async (req, res) => {
   try {
-    const jobPosts = await JobPost.find().populate("postedBy", "username email");
-    res.status(200).json(jobPosts);
+    const {
+      location,
+      employmentType,
+      industry,
+      experienceLevel,
+      keyword,
+      page = 1,
+      limit = 10,
+      sort = "newest"
+    } = req.query;
+
+    const filter = {};
+
+    if (location) filter.location = location;
+    if (employmentType) filter.employmentType = employmentType;
+    if (industry) filter.industry = industry;
+    if (experienceLevel) filter.experienceLevel = experienceLevel;
+
+    if (keyword) {
+      filter.$or = [
+        { title: { $regex: keyword, $options: "i" } },
+        { description: { $regex: keyword, $options: "i" } }
+      ];
+    }
+
+    const skip = (page - 1) * limit;
+    const sortOption = sortOptionsMap[sort] || sortOptionsMap["newest"];
+
+    const [jobPosts, total] = await Promise.all([
+      JobPost.find(filter)
+        .populate("postedBy", "username email")
+        .sort(sortOption)
+        .skip(skip)
+        .limit(parseInt(limit)),
+      JobPost.countDocuments(filter)
+    ]);
+
+    res.status(200).json({
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / limit),
+      jobPosts
+    });
   } catch (error) {
     res.status(500).json({ message: "Error fetching job posts", error });
   }
 };
+
 
 
 exports.getJobPostById = async (req, res) => {

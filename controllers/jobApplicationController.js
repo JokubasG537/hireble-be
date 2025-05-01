@@ -1,6 +1,7 @@
 const JobApplication = require("../models/JobApplication");
 
 
+
 exports.createApplication = async (req, res) => {
   try {
     const { jobPost, resume } = req.body;
