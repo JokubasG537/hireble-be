@@ -1,5 +1,5 @@
 const Company = require("../models/Company");
-
+const User = require("../models/userModel");
 
 exports.createCompany = async (req, res) => {
   try {
@@ -22,10 +22,32 @@ exports.createCompany = async (req, res) => {
 
 exports.getAllCompanies = async (req, res) => {
   try {
-    const companies = await Company.find();
+    const { search } = req.query;
+    let filter = {};
+
+    if (search) {
+      filter.name = { $regex: search, $options: "i" };
+    }
+
+    const companies = await Company.find(filter);
     res.status(200).json({ companies });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch companies", details: err.message });
+  }
+};
+
+
+exports.getCurrentCompany = async (req, res) => {
+  try {
+    console.log("Getting company for user ID:", req.user._id);
+    const user = await User.findById(req.user._id).populate("company");
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    console.log("User company data:", user.company);
+    res.status(200).json(user.company);
+  } catch (error) {
+    console.error("Error fetching company:", error);
+    res.status(500).json({ message: "Failed to fetch company", error: error.message });
   }
 };
 

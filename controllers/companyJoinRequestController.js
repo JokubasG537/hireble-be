@@ -4,10 +4,10 @@ const User = require("../models/userModel");
 
 const createRequest = async (req, res) => {
   try {
-    const recruiterId = req.user._id; // from auth middleware
+    const recruiterId = req.user._id;
     const { companyId } = req.body;
 
-    // Check if a pending request already exists
+
     const existing = await CompanyJoinRequest.findOne({
       recruiter: recruiterId,
       company: companyId,
@@ -78,8 +78,31 @@ const rejectRequest = async (req, res) => {
   }
 };
 
+const getRequestsByCompany = async (req, res) => {
+  const { companyId } = req.params;
+  const { status } = req.query;
+
+  try {
+    const filter = { company: companyId };
+    if (status) filter.status = status;
+
+    const requests = await CompanyJoinRequest.find(filter)
+      .populate('recruiter', 'username email')
+      .sort({ createdAt: -1 }); 
+
+    res.status(200).json({ requests });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch company join requests",
+      error: error.message
+    });
+  }
+};
+
+
 module.exports = {
   approveRequest,
   rejectRequest,
-  createRequest
+  createRequest,
+  getRequestsByCompany
 };

@@ -2,6 +2,8 @@ const User = require("../models/userModel.js");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const Company = require("../models/Company");
+const mongoose = require("mongoose");
+
 
 const registerUser = async (req, res) => {
   const { username, email, password, role  } = req.body;
@@ -61,11 +63,13 @@ const loginUser = async (req, res) => {
     if (!user) return res.status(400).json({ message: "User not found." });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: "Invalid credentials." });
-    const token = jwt.sign(
-      { id: user._id, username: user.username, email: user.email, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "2h" }
-    );
+
+      const token = jwt.sign(
+        { id: user._id, username: user.username, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: "2h" }
+      );
+
     res.status(200).json({
       message: "Login successful.",
       user: { id: user._id, username: user.username, email: user.email },
@@ -86,6 +90,15 @@ const logoutUser = (req, res) => {
 
 const getUsers = async (req, res) => {
   try {
+    if (req.query.ids) {
+      const userIds = req.query.ids.split(',');
+      const users = await User.find({
+        _id: { $in: userIds }
+      }).select('-password');
+
+      return res.status(200).json(users);
+    }
+
     const users = await User.find().select("-password");
     res.status(200).json(users);
   } catch (error) {
@@ -97,9 +110,15 @@ const getUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
   const { id } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ message: "Invalid user ID format." });
+  }
 
   try {
-    const user = await User.findById(id).select("-password");
+    const user = await User.findById(id)
+      .select("-password")
+      .populate('company'); 
+
     if (!user) return res.status(404).json({ message: "User not found." });
     res.status(200).json(user);
   } catch (error) {
@@ -108,18 +127,24 @@ const getUserById = async (req, res) => {
   }
 };
 
+
 const getCurrentUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).select("-password");
+    const user = await User.findById(req.user._id)
+      .select("-password")
+      .populate('company');
+
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
+
     res.status(200).json(user);
   } catch (error) {
     console.error("Error fetching current user:", error);
     res.status(500).json({ message: "Failed to fetch current user." });
   }
 };
+
 
 
 
@@ -132,6 +157,7 @@ const updateUser = async (req, res) => {
       const emailExists = await User.findOne({ email, _id: { $ne: id } });
       if (emailExists) return res.status(409).json({ message: "Email already in use." });
     }
+
 
     if (username) {
       const usernameExists = await User.findOne({ username, _id: { $ne: id } });
@@ -191,7 +217,7 @@ const assignCompanyToRecruiter = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(req.user._id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (user.role !== "recruiter") {

@@ -1,17 +1,26 @@
 const JobPost = require("../models/JobPost");
-
+const sanitizeHtml = require("sanitize-html");
 
 exports.createJobPost = async (req, res) => {
   try {
     const { title, company, location, description } = req.body;
 
-    const jobPost = await JobPost.create({
+    const sanitizedDescription = sanitizeHtml(description, {
+      allowedTags: ["p", "h1", "h2", "h3", "ul", "ol", "li", "strong", "em", "a"],
+      allowedAttributes: {
+        a: ["href"],
+      },
+    });
+
+    const jobPost = new JobPost({
       title,
       company,
       location,
-      description,
-      postedBy: req.user._id
+      description: sanitizedDescription,
+      postedBy: req.user._id,
     });
+
+    await jobPost.save();
 
     res.status(201).json(jobPost);
   } catch (error) {
@@ -60,6 +69,7 @@ exports.getAllJobPosts = async (req, res) => {
     const [jobPosts, total] = await Promise.all([
       JobPost.find(filter)
         .populate("postedBy", "username email")
+        .populate("company", "name")
         .sort(sortOption)
         .skip(skip)
         .limit(parseInt(limit)),
@@ -82,7 +92,10 @@ exports.getAllJobPosts = async (req, res) => {
 exports.getJobPostById = async (req, res) => {
   try {
     const { id } = req.params;
-    const jobPost = await JobPost.findById(id).populate("postedBy", "username email");
+
+    const jobPost = await JobPost.findById(id)
+      .populate("postedBy", "username email")
+      .populate("company", "name");
 
     if (!jobPost) {
       return res.status(404).json({ message: "Job post not found." });
@@ -94,11 +107,12 @@ exports.getJobPostById = async (req, res) => {
   }
 };
 
+
 exports.updateJobPost = async (req, res) => {
   try {
     const { id } = req.params;
-
     const jobPost = await JobPost.findById(id);
+
     if (!jobPost) {
       return res.status(404).json({ message: "Job post not found." });
     }
@@ -115,7 +129,15 @@ exports.updateJobPost = async (req, res) => {
     jobPost.title = title || jobPost.title;
     jobPost.company = company || jobPost.company;
     jobPost.location = location || jobPost.location;
-    jobPost.description = description || jobPost.description;
+
+    if (description) {
+      jobPost.description = sanitizeHtml(description, {
+        allowedTags: ["p", "h1", "h2", "h3", "ul", "ol", "li", "strong", "em", "a"],
+        allowedAttributes: {
+          a: ["href"],
+        },
+      });
+    }
 
     const updatedPost = await jobPost.save();
     res.status(200).json(updatedPost);
@@ -123,6 +145,7 @@ exports.updateJobPost = async (req, res) => {
     res.status(500).json({ message: "Error updating job post", error });
   }
 };
+
 
 
 exports.deleteJobPost = async (req, res) => {

@@ -22,7 +22,7 @@ const companyJoinRequestsApi = require("./api/companyJoinRequest.js");
 app.use("/jobPosts", jobPostsApi);
 app.use("/savedJobs", savedJobsApi);
 app.use("/users", usersApi);
-app.use("/resume", resumeApi);
+app.use("/resumes", resumeApi);
 app.use("/companies", companiesApi);
 app.use("/jobApplications", jobApplicationsApi);
 app.use("/companyJoinRequests", companyJoinRequestsApi);

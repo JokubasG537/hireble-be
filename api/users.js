@@ -4,8 +4,6 @@ const authMiddleware = require("../middleware/auth");
 const authorizeRole = require("../middleware/authorizeRole");
 const Company = require("../models/Company");
 
-
-
 const {
   registerUser,
   loginUser,
@@ -18,22 +16,15 @@ const {
   assignCompanyToRecruiter
 } = require("../controllers/userController");
 
-
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/", getUsers);
+router.get("/current", authMiddleware, getCurrentUser);
 router.get("/:id", getUserById);
-
-router.get("/current",authMiddleware, getCurrentUser);
 router.put("/:id", authMiddleware, updateUser);
 router.delete("/:id", authMiddleware, deleteUser);
-router.post("/logout",authMiddleware, logoutUser);
+router.post("/logout", authMiddleware, logoutUser);
+router.patch("/company", authMiddleware, authorizeRole("recruiter"), assignCompanyToRecruiter);
 
-router.patch(
-  "/:id/company",
-  authMiddleware,
-  authorizeRole("recruiter"),
-  assignCompanyToRecruiter
-);
 
 module.exports = router;
