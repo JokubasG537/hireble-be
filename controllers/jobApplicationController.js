@@ -1,5 +1,5 @@
 const JobApplication = require("../models/JobApplication");
-
+const JobPost = require("../models/JobPost");
 
 
 exports.createApplication = async (req, res) => {
@@ -93,5 +93,27 @@ exports.deleteApplication = async (req, res) => {
     res.json({ message: "Application withdrawn" });
   } catch (err) {
     res.status(500).json({ error: "Failed to delete application", details: err.message });
+  }
+};
+
+exports.getCompanyApplications = async (req, res) => {
+  try {
+    const companyId = req.params.companyId.trim();
+
+
+    const jobPosts = await JobPost.find({ company: companyId });
+    const jobPostIds = jobPosts.map(post => post._id);
+
+    const applications = await JobApplication.find({
+      jobPost: { $in: jobPostIds }
+    })
+    .populate('user', 'username email')
+    .populate('jobPost', 'title company')
+    .populate('resume', 'title fileUrl')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json({ applications });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };

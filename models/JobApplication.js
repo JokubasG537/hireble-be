@@ -8,7 +8,7 @@ const jobApplicationSchema = new mongoose.Schema({
   },
   jobPost: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Job",
+    ref: "JobPost",
     required: true
   },
   resume: {
@@ -28,4 +28,3 @@ const jobApplicationSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 module.exports = mongoose.model("JobApplication", jobApplicationSchema);
-
