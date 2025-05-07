@@ -117,3 +117,29 @@ exports.getCompanyApplications = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+
+exports.updateApplicationAsRecruiter = async (req, res) => {
+  try {
+    const { companyId, applicationId } = req.params;
+    const application = await JobApplication.findById(applicationId)
+      .populate("jobPost");
+
+    if (!application) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+
+    if (req.user.role !== "recruiter"
+      || !application.jobPost.company.equals(companyId)) {
+      return res.status(403).json({ error: "Not authorized to update this application" });
+    }
+
+    const { status, notes } = req.body;
+    if (status) application.status = status;
+    if (notes)  application.notes  = notes;
+    await application.save();
+    res.json({ message: "Application updated", application });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to update application", details: err.message });
+  }
+};

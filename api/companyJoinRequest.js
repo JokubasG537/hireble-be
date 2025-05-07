@@ -9,28 +9,28 @@ const { approveRequest, rejectRequest, createRequest, getRequestsByCompany } = r
 router.post(
   "/",
   authMiddleware,
-  authorizeRole("recruiter"),
+  authorizeRole("recruiter", "admin"),
   companyJoinRequestController.createRequest
 );
 
 router.patch(
   "/:requestId/approve",
   authMiddleware,
-  authorizeRole("recruiter"),
+  authorizeRole("recruiter", "admin"),
   companyJoinRequestController.approveRequest
 );
 
 router.patch(
   "/:requestId/reject",
   authMiddleware,
-  authorizeRole("recruiter"),
+  authorizeRole("recruiter", "admin"),
   companyJoinRequestController.rejectRequest
 );
 
 router.get(
   '/company/:companyId',
   authMiddleware,
-  authorizeRole('recruiter'),
+  authorizeRole("recruiter", "admin"),
   companyJoinRequestController.getRequestsByCompany
 );
 

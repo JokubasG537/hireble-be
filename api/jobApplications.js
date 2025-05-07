@@ -12,6 +12,11 @@ router.get("/:id", authMiddleware, jobAppController.getApplicationById);
 router.put("/:id", authMiddleware, jobAppController.updateApplication);
 router.delete("/:id", authMiddleware, jobAppController.deleteApplication);
 router.get("/company/:companyId", authMiddleware, jobAppController.getCompanyApplications);
+router.put(
+  "/company/:companyId/:applicationId",
+  authMiddleware,
+  jobAppController.updateApplicationAsRecruiter
+);
 
 
 module.exports = router;
