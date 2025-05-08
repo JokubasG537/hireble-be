@@ -117,7 +117,7 @@ const getUserById = async (req, res) => {
   try {
     const user = await User.findById(id)
       .select("-password")
-      .populate('company'); 
+      .populate('company');
 
     if (!user) return res.status(404).json({ message: "User not found." });
     res.status(200).json(user);
@@ -250,53 +250,7 @@ const assignCompanyToRecruiter = async (req, res) => {
 };
 
 
-const addToFavorites = async (req, res) => {
-  const userId = req.params.userId;
-  const { carId } = req.body;
 
-  try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found." });
-
-    if (user.favorites.includes(carId)) {
-      return res.status(400).json({ message: "Car is already in favorites." });
-    }
-
-    user.favorites.push(carId);
-    await user.save();
-
-    res.status(200).json({
-
-      favorites: user.favorites
-    });
-  } catch (error) {
-    console.error(error);
-
-  }
-};
-
-// todo: remove cars and add jobs instead
-
-const removeFromFavorites = async (req, res) => {
-  const userId = req.params.userId;
-  const carId = req.params.carId;
-
-  try {
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "Nerasta" });
-
-    user.favorites = user.favorites.filter(id => id.toString() !== carId);
-    await user.save();
-
-    res.status(200).json({
-
-      favorites: user.favorites
-    });
-  } catch (error) {
-    console.error(error);
-
-  }
-};
 
 module.exports = {
   registerUser,
@@ -307,7 +261,7 @@ module.exports = {
   getCurrentUser,
   updateUser,
   deleteUser,
-  addToFavorites,
-  removeFromFavorites,
+  // addToFavorites,
+  // removeFromFavorites,
   assignCompanyToRecruiter
 };
