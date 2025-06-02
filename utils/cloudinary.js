@@ -16,6 +16,17 @@ const storage = new CloudinaryStorage({
   }
 });
 
-const upload = multer({ storage });
+const imageStorage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: "images",
+    allowed_formats: ["jpg", "jpeg", "png", "gif", "webp"],
+    transformation: [{ width: 1000, height: 1000, crop: "limit" }]
+  }
+});
 
-module.exports = { cloudinary, upload };
+
+const upload = multer({ storage });
+const uploadImage = multer({ storage: imageStorage });
+
+module.exports = { cloudinary, upload, uploadImage };

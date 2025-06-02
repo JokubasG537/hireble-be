@@ -7,6 +7,7 @@ const { isResumeOwner } = require("../middleware/ownershipCheck");
 
 
 router.post("/", upload.single("file"), authMiddleware, resumeController.uploadResume);
+
 router.get("/", authMiddleware, resumeController.getUserResumes);
 
 

@@ -18,6 +18,7 @@ const resumeApi = require("./api/resume.js");
 const companiesApi = require("./api/company.js");
 const jobApplicationsApi = require("./api/jobApplications.js");
 const companyJoinRequestsApi = require("./api/companyJoinRequest.js");
+const imagesApi = require("./api/images.js");
 
 app.use("/jobPosts", jobPostsApi);
 app.use("/savedJobs", savedJobsApi);
@@ -26,6 +27,7 @@ app.use("/resumes", resumeApi);
 app.use("/companies", companiesApi);
 app.use("/jobApplications", jobApplicationsApi);
 app.use("/companyJoinRequests", companyJoinRequestsApi);
+app.use("/images", imagesApi);
 
 const PORT = process.env.PORT || 5000;
 

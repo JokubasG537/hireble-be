@@ -39,7 +39,15 @@ const userSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Resume"
       }
-    ]
+    ],
+    profileImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Image"
+    },
+    coverImage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Image"
+    }
   },
   { timestamps: true }
 );
