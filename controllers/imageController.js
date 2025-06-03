@@ -15,7 +15,7 @@ exports.uploadImage = async (req, res) => {
         await User.findByIdAndUpdate(
             req.user._id,
             {$push: { images: image._id}}
-        ) // ✅ Added closing parenthesis
+        ) 
 
         res.status(201).json({ message: 'Image uploaded', image });
     } catch (err) {
