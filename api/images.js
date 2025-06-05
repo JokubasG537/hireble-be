@@ -9,7 +9,7 @@ router.post("/",
     authMiddleware,
     uploadImage.single('image'),
     imageController.uploadImage
-) 
+)
 
 router.get("/",
     authMiddleware,
@@ -18,7 +18,7 @@ router.get("/",
 )
 
 router.get("/:id",
-    authMiddleware,
+    // authMiddleware,
     imageController.getImageById
 )
 
